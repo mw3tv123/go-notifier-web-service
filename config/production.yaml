@@ -1,0 +1,11 @@
+server:
+  port: "80"
+
+# Database
+database:
+  address: "mysqldb:3306"
+  username: "root"
+  password: "p@ssw0rd1"
+  protocol: "tcp"
+  driver: "mysql"
+  name: "notifier"
