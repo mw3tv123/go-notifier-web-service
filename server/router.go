@@ -2,8 +2,8 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-notify/controllers"
-	"go-notify/middlewares"
+	"github.com/mw3tv123/go-notify/controllers"
+	"github.com/mw3tv123/go-notify/middlewares"
 )
 
 func NewRouter() *gin.Engine {

@@ -1,9 +1,8 @@
-module go-notify
+module github.com/mw3tv123/go-notify
 
 go 1.16
 
 require (
-	github.com/agnivade/levenshtein v1.1.1
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/google/go-cmp v0.5.6 // indirect

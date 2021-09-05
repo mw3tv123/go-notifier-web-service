@@ -1,23 +1,23 @@
 package main
 
 import (
-    "flag"
-    "fmt"
-    "os"
+	"flag"
+	"fmt"
+	"os"
 
-    "go-notify/config"
-    "go-notify/db"
-    "go-notify/server"
+	"github.com/mw3tv123/go-notify/config"
+	"github.com/mw3tv123/go-notify/server"
 )
 
 func main() {
-    environment := flag.String("e", "development", "Application runtime environment")
-    flag.Usage = func() {
-        fmt.Println("Usage: server -e {mode}")
-        os.Exit(1)
-    }
-    flag.Parse()
-    config.Init(*environment)
-    db.Init()
-    server.Init()
+	environment := flag.String("e", "development", "Application runtime environment")
+	flag.Usage = func() {
+		fmt.Println("Usage: server -e {mode}")
+		os.Exit(1)
+	}
+	flag.Parse()
+	config.Init(*environment)
+	// We do not need to connect to db right now
+	// db.Init()
+	server.Init()
 }
