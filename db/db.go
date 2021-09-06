@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	// MySQL lib
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/mw3tv123/go-notify/config"
 )
@@ -56,12 +57,6 @@ func Init() {
 		log.Fatal(err)
 	}
 	log.Println("DONE!")
-}
-
-// SaveLog Log trigger build and params into DB
-func (db MySQL) SaveLog(moduleId int, userDomain, params string) {
-	queryCmd := "INSERT INTO trigger_timeline(user_domain, module_id, params) VALUES(?, ?, ?)"
-	db.ExecuteCommand(queryCmd, userDomain, moduleId, params)
 }
 
 // QueryCommand A wrapper for handle execute query with param and return result from query.

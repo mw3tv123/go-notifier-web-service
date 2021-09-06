@@ -1,12 +1,12 @@
 #syntax=docker/dockerfile:experimental
 FROM golang:alpine AS build-env
 WORKDIR /app/
-ADD . /app/
+COPY . /app/
 ENV GO111MODULE=on
 RUN go get -v
 RUN CGO_ENABLED=0 go build -o /main ./main.go
 
-FROM alpine
+FROM alpine:3.13
 WORKDIR /app
 RUN apk add --no-cache && \
     apk add tzdata

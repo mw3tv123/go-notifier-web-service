@@ -9,3 +9,6 @@ database:
   protocol: "tcp"
   driver: "mysql"
   name: "notifier"
+
+# MS Teams webhook
+ms_teams_webhook: ""

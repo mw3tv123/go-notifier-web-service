@@ -9,10 +9,10 @@ import (
 // NotifyForm ...
 type NotifyForm struct{}
 
-// MSTeamNotifyForm ...
-type MSTeamNotifyForm struct {
+// CreateMSTeamNotifyForm ...
+type CreateMSTeamNotifyForm struct {
 	Title   string `form:"title" json:"title" binding:"required,min=3,max=100"`
-	Message string `form:"message" json:"message" binding:"required,max=200,message"`
+	Content string `form:"content" json:"content" binding:"required,min=3,max=1000"`
 }
 
 // Title ...
@@ -30,23 +30,23 @@ func (f NotifyForm) Title(tag string, errMsg ...string) (message string) {
 	}
 }
 
-// Message ...
-func (f NotifyForm) Message(tag string, errMsg ...string) (message string) {
+// Content ...
+func (f NotifyForm) Content(tag string, errMsg ...string) (message string) {
 	switch tag {
 	case "required":
 		if len(errMsg) == 0 {
-			return "Please enter your message"
+			return "Please enter your notify content"
 		}
 		return errMsg[0]
-	case "min", "max", "message":
-		return "Please enter a valid message"
+	case "min", "max":
+		return "Content should be between 3 to 1000 characters"
 	default:
 		return "Something went wrong, please try again later"
 	}
 }
 
-// Notify ...
-func (f NotifyForm) Notify(err error) string {
+// CreateNotify ...
+func (f NotifyForm) CreateNotify(err error) string {
 	switch err.(type) {
 	case validator.ValidationErrors:
 		if _, ok := err.(*json.UnmarshalTypeError); ok {
@@ -57,8 +57,8 @@ func (f NotifyForm) Notify(err error) string {
 			if err.Field() == "Title" {
 				return f.Title(err.Tag())
 			}
-			if err.Field() == "Message" {
-				return f.Message(err.Tag())
+			if err.Field() == "Content" {
+				return f.Content(err.Tag())
 			}
 		}
 
