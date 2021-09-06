@@ -15,7 +15,7 @@ type MSTeamController struct {
 	MsTeamsService *msteams.MSTeams
 }
 
-var notifyForm = new(forms.NotifyForm)
+var msTeamsNotifyForm = new(forms.MSTeamsNotifyForm)
 
 // NewMSTeamsController ...
 func NewMSTeamsController() MSTeamController {
@@ -32,7 +32,7 @@ func (ms MSTeamController) Notify(c *gin.Context) {
 	var msTeamNotifyForm forms.CreateMSTeamNotifyForm
 
 	if validationErr := c.ShouldBindJSON(&msTeamNotifyForm); validationErr != nil {
-		message := notifyForm.CreateNotify(validationErr)
+		message := msTeamsNotifyForm.CreateNotify(validationErr)
 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": message})
 		return
 	}

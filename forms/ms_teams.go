@@ -6,8 +6,8 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// NotifyForm ...
-type NotifyForm struct{}
+// MSTeamsNotifyForm ...
+type MSTeamsNotifyForm struct{}
 
 // CreateMSTeamNotifyForm ...
 type CreateMSTeamNotifyForm struct {
@@ -16,7 +16,7 @@ type CreateMSTeamNotifyForm struct {
 }
 
 // Title ...
-func (f NotifyForm) Title(tag string, errMsg ...string) (message string) {
+func (f MSTeamsNotifyForm) Title(tag string, errMsg ...string) (message string) {
 	switch tag {
 	case "required":
 		if len(errMsg) == 0 {
@@ -31,7 +31,7 @@ func (f NotifyForm) Title(tag string, errMsg ...string) (message string) {
 }
 
 // Content ...
-func (f NotifyForm) Content(tag string, errMsg ...string) (message string) {
+func (f MSTeamsNotifyForm) Content(tag string, errMsg ...string) (message string) {
 	switch tag {
 	case "required":
 		if len(errMsg) == 0 {
@@ -46,7 +46,7 @@ func (f NotifyForm) Content(tag string, errMsg ...string) (message string) {
 }
 
 // CreateNotify ...
-func (f NotifyForm) CreateNotify(err error) string {
+func (f MSTeamsNotifyForm) CreateNotify(err error) string {
 	switch err.(type) {
 	case validator.ValidationErrors:
 		if _, ok := err.(*json.UnmarshalTypeError); ok {
