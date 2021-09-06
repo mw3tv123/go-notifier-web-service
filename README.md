@@ -1,5 +1,3 @@
-
-
 # go-notifier-web-service
 > An all-round notifier build in Go as a web hooker for other tools in terms of 3rd party notifier.
 

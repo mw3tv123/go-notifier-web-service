@@ -13,6 +13,7 @@ import (
 	"github.com/mw3tv123/go-notify/config"
 )
 
+// Init ...
 func Init() {
 	router := NewRouter()
 

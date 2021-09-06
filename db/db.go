@@ -13,14 +13,15 @@ import (
 var mysqlDB *MySQL
 
 type (
+	// MySQL ...
 	MySQL struct {
 		*sql.DB
 	}
-	// A function used to handle result from query statement.
+	// resultHandler used to handle result from query statement.
 	resultHandler func(*sql.Rows) interface{}
 )
 
-// Create new DB Context, return error if fail to connect DB.
+// createDBConnection Create new DB Context, return error if fail to connect DB.
 func createDBConnection(driver, dataSource string) error {
 	// Open connection.
 	db, err := sql.Open(driver, dataSource)
@@ -40,6 +41,7 @@ func createDBConnection(driver, dataSource string) error {
 	return nil
 }
 
+// GetDB ...
 func GetDB() *MySQL {
 	return mysqlDB
 }
