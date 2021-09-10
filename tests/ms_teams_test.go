@@ -16,7 +16,7 @@ func TestMSTeamNotify(t *testing.T) {
 	router := server.NewRouter()
 
 	var successBody = []byte(`{ "title": "test", "content": "test" }`)
-	var invalidBody = []byte(`{ "title": "test", "content": "test" }`)
+	var invalidBody = []byte(`{ "invalid_field": "invalid)_value", "content": "test" }`)
 
 	successRec := httptest.NewRecorder()
 	failRec := httptest.NewRecorder()

@@ -4,8 +4,15 @@ go:
 os:
   - linux
   - osx
+env:
+  - CODECLIMATE_API_HOST=https://codebeat.co/webhooks/code_coverage
+  - CODECLIMATE_REPO_TOKEN=8ad64015-9459-4c8e-ad69-a5531972a966
 dist: trusty
 install: true
+before_script:
+  - bash <(curl -Ls https://coverage.codacy.com/get.sh) download
 script:
   - env GO111MODULE=on go build
-  - env GO111MODULE=on go test -v ./tests/*
+  - env GO111MODULE=on go test -coverprofile=coverage.out -v ./tests/*
+after_success:
+  - bash <(curl -Ls https://coverage.codacy.com/get.sh)
