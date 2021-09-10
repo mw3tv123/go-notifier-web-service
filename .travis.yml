@@ -1,9 +1,6 @@
 language: go
 go:
   - 1.16
-node_js:
-  - node
-  - 14
 os:
   - linux
   - osx
@@ -11,10 +8,13 @@ env:
   - CODACY_PROJECT_TOKEN=0d93d3ba284543ecb3c41dbc7544d8b1 CODECLIMATE_API_HOST=https://codebeat.co/webhooks/code_coverage CODECLIMATE_REPO_TOKEN=8ad64015-9459-4c8e-ad69-a5531972a966
 dist: trusty
 install: true
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 script:
   - env GO111MODULE=on go build
   - env GO111MODULE=on go test -coverprofile=coverage.out -v ./tests/*
 after_success:
-  - npm install -g codeclimate-test-reporter
-  - bash codeclimate-test-reporter < coverage.out
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
   - bash <(curl -Ls https://coverage.codacy.com/get.sh) report --force-coverage-parser go -r coverage.out
