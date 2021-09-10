@@ -5,7 +5,9 @@ os:
   - linux
   - osx
 env:
-  - CODACY_PROJECT_TOKEN=985771987a4042869ac4b4437d0aedb5c95cf97d
+  - CODACY_PROJECT_TOKEN=0d93d3ba284543ecb3c41dbc7544d8b1
+  - CODECLIMATE_API_HOST=https://codebeat.co/webhooks/code_coverage
+  - CODECLIMATE_REPO_TOKEN=8ad64015-9459-4c8e-ad69-a5531972a966
 dist: trusty
 install: true
 before_script:
@@ -14,4 +16,5 @@ script:
   - env GO111MODULE=on go build
   - env GO111MODULE=on go test -coverprofile=coverage.out -v ./tests/*
 after_success:
-  - bash <(curl -Ls https://coverage.codacy.com/get.sh)
+  - bash codeclimate-test-reporter < coverage.out
+  - bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.out
