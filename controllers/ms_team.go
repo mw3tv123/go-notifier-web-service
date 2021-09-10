@@ -17,7 +17,7 @@ type MSTeamController struct {
 
 var msTeamsNotifyForm = new(forms.MSTeamsNotifyForm)
 
-// NewMSTeamsController ...
+// NewMSTeamsController Initiate MSTeams service for transmitting message to MS Teams
 func NewMSTeamsController() MSTeamController {
 	msTeamsController := MSTeamController{
 		MsTeamsService: msteams.New(),

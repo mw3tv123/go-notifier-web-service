@@ -5,11 +5,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/mw3tv123/go-notify/config"
 	"github.com/mw3tv123/go-notify/server"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHealth(t *testing.T) {
+	config.Init("development")
 	router := server.NewRouter()
 
 	w := httptest.NewRecorder()
