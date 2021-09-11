@@ -12,7 +12,7 @@ import (
 )
 
 func TestMSTeamNotify(t *testing.T) {
-	config.Init("development")
+	config.Init()
 	router := server.NewRouter()
 
 	var successBody = []byte(`{ "title": "test", "content": "test" }`)
@@ -21,8 +21,8 @@ func TestMSTeamNotify(t *testing.T) {
 	successRec := httptest.NewRecorder()
 	failRec := httptest.NewRecorder()
 
-	reqSuccess, _ := http.NewRequest("POST", "/api/ms_teams", bytes.NewBuffer(successBody))
-	reqFail, _ := http.NewRequest("POST", "/api/ms_teams", bytes.NewBuffer(invalidBody))
+	reqSuccess, _ := http.NewRequest("POST", "/ms_teams", bytes.NewBuffer(successBody))
+	reqFail, _ := http.NewRequest("POST", "/ms_teams", bytes.NewBuffer(invalidBody))
 
 	router.ServeHTTP(successRec, reqSuccess)
 	router.ServeHTTP(failRec, reqFail)

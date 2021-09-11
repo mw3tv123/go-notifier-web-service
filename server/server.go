@@ -18,7 +18,7 @@ func Init() {
 	router := NewRouter()
 
 	srv := &http.Server{
-		Addr:    "0.0.0.0:" + config.GetConfig().GetString("server.port"),
+		Addr:    fmt.Sprintf("%s:%s", config.GetConfig("HOST"), config.GetConfig("PORT")),
 		Handler: router,
 	}
 	go Run(srv)
