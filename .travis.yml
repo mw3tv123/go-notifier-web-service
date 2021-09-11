@@ -9,7 +9,7 @@ env:
 dist: trusty
 install: true
 before_script:
-  - ./script/download-codeclimate.sh
+  - ./scripts/download-codeclimate.sh
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 script:
