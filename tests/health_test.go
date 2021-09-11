@@ -11,7 +11,7 @@ import (
 )
 
 func TestHealth(t *testing.T) {
-	config.Init("development")
+	config.Init()
 	router := server.NewRouter()
 
 	w := httptest.NewRecorder()

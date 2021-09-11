@@ -11,11 +11,21 @@
 ## Installation
 
 ```shell
+# Pull dependencies
 $ make deps
+$ go build 
+$ go run .
+2021/09/11 21:36:50 Listening and serving HTTP on 0.0.0.0:80
 ```
 
+## Configuration
+All configurations are stored in `config/app.env`. Besides, configurations can be overrided from export environment.
+
 ## Usage example
+Current developed API:
+- `/health`
+- `/ms_teams`
 
 ```shell
-$ curl http://localhost:8090/health
+$ curl http://localhost:8090/health -d '{ "title": "test-title", "content": "test content" }'
 ```

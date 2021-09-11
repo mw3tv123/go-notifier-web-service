@@ -15,12 +15,10 @@ func NewRouter() *gin.Engine {
 
 	health := new(controllers.HealthController)
 	router.GET("/health", health.Status)
-	api := router.Group("/api")
-	{
-		/*** START MS TEAMS ***/
-		msTeamsController := controllers.NewMSTeamsController()
-		api.POST("/ms_teams", msTeamsController.Notify)
-	}
+
+	/*** START MS TEAMS ***/
+	msTeamsController := controllers.NewMSTeamsController()
+	router.POST("/ms_teams", msTeamsController.Notify)
 
 	return router
 }

@@ -22,7 +22,7 @@ func NewMSTeamsController() MSTeamController {
 	msTeamsController := MSTeamController{
 		MsTeamsService: msteams.New(),
 	}
-	msTeamsController.MsTeamsService.AddReceivers(config.GetConfig().GetString("ms_teams_webhook"))
+	msTeamsController.MsTeamsService.AddReceivers(config.GetConfig("MS_TEAMS_WEBHOOK"))
 
 	return msTeamsController
 }
