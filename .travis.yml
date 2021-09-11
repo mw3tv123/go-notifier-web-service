@@ -14,7 +14,8 @@ before_script:
   - ./cc-test-reporter before-build
 script:
   - env GO111MODULE=on go build
-  - env GO111MODULE=on go test -json ./tests/... -covermode=atomic -coverpkg=./... -coverprofile=coverage.out
+  - env GO111MODULE=on go test -json ./tests/... -covermode=atomic -coverpkg=./... -coverprofile=cover.out
 after_success:
-  - ./cc-test-reporter after-build --coverage-input-type gocov --exit-code $TRAVIS_TEST_RESULT
-  - bash <(curl -Ls https://coverage.codacy.com/get.sh) report --force-coverage-parser go -r coverage.out
+  - ./cc-test-reporter format-coverage -t gocov cover.out
+  - ./cc-test-reporter upload-coverage
+  - bash <(curl -Ls https://coverage.codacy.com/get.sh) report --force-coverage-parser go -r cover.out
