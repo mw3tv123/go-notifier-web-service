@@ -3,7 +3,7 @@ server:
 
 # Database
 database:
-  address: "mysqldb:3306"
+  address: "localhost:3306"
   username: "root"
   password: "p@ssw0rd1"
   protocol: "tcp"
@@ -11,4 +11,4 @@ database:
   name: "notifier"
 
 # MS Teams webhook
-ms_teams_webhook: "Your Teams webhook go here"
+ms_teams_webhook: "https://vngms.webhook.office.com/webhookb2/70b30a98-196a-43e7-ae1e-cb67b67e3c0f@7c112a6e-10e2-4e09-afc4-2e37bc60d821/IncomingWebhook/eba3b645a7114041b2a9b3c1d4afc87c/8af52f50-5b7f-4691-8c93-7f54240e8a0f"
