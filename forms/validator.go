@@ -2,8 +2,6 @@ package forms
 
 import (
 	"reflect"
-	"regexp"
-	"strings"
 	"sync"
 
 	"github.com/gin-gonic/gin/binding"
@@ -43,10 +41,10 @@ func (v *DefaultValidator) lazyInit() {
 		v.validate = validator.New()
 		v.validate.SetTagName("binding")
 
-		// add any custom validations etc. here
+		// Add any custom validations etc. here
 
-		// Custom rule for user full name
-		// _ = v.validate.RegisterValidation("fullName", ValidateFullName)
+		// Custom rule for create_date in alert POST APi
+		// _ = v.validate.RegisterValidation("ISO8601date", ValidateISO8601Field)
 	})
 }
 
@@ -59,18 +57,4 @@ func kindOfData(data interface{}) reflect.Kind {
 		valueType = value.Elem().Kind()
 	}
 	return valueType
-}
-
-// ValidateFullName implements validator.Func
-func ValidateFullName(fl validator.FieldLevel) bool {
-	// Remove the extra space
-	space := regexp.MustCompile(`\s+`)
-	name := space.ReplaceAllString(fl.Field().String(), " ")
-
-	// Remove trailing spaces
-	name = strings.TrimSpace(name)
-
-	// To support all possible languages
-	matched, _ := regexp.Match(`^[^±!@£$%^&*_+§¡€#¢¶•ªº«\\/<>?:;'"|=.,0123456789]{3,20}$`, []byte(name))
-	return matched
 }
