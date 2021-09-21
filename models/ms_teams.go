@@ -17,7 +17,6 @@ type MSTeamsService struct {
 
 // NewMSTeamsService returns a new instance of a MSTeams notification service.
 // For more information about MSTeams api token:
-//    -> https://github.com/atc0005/go-teams-notify#example-basic
 func NewMSTeamsService() *MSTeamsService {
 	client := msTeams.NewClient()
 
@@ -71,11 +70,6 @@ func (m MSTeamsService) GenerateAlertCard(alertForm forms.CreateMSTeamsAlertForm
 	// Add message title
 	msgCardSection := msTeams.NewMessageCardSection()
 	msgCardSection.Title = fmt.Sprintf("**%s**", alertForm.Title)
-
-	// err := msgCardSection.AddImage(m.AddImageCardSection("Alert Status", "https://adaptivecards.io/content/pending.png"))
-	// if err != nil {
-	//     return alertCard, err
-	// }
 
 	// Add message body
 	err := msgCardSection.AddFact(m.CreateFactsFromList(map[string]string{"Monitor Name": alertForm.MonitorName, "Description": alertForm.Description, "Critical Level": string(rune(alertForm.Priority)), "Submitted On": alertForm.CreateDate.String()})...)
