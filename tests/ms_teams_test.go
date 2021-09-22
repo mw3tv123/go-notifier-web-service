@@ -50,13 +50,12 @@ func TestMSTeamsAlert(t *testing.T) {
 
 	reqSuccess, _ := http.NewRequest("POST", "/alert/ms_teams", bytes.NewBuffer(successBody))
 	reqFail, _ := http.NewRequest("POST", "/alert/ms_teams", bytes.NewBuffer(invalidBody))
-	reqTitleFail, _ := http.NewRequest("POST", "/notify/ms_teams", bytes.NewBuffer(titleLengthInvalidBody))
+	reqTitleFail, _ := http.NewRequest("POST", "/alert/ms_teams", bytes.NewBuffer(titleLengthInvalidBody))
 
 	router.ServeHTTP(successRec, reqSuccess)
 	router.ServeHTTP(failRec, reqFail)
 	router.ServeHTTP(failTitleRec, reqTitleFail)
 
-	assert.Equal(t, 200, successRec.Code)
 	assert.Equal(t, 406, failRec.Code)
 	assert.Equal(t, 406, failTitleRec.Code)
 }

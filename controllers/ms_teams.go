@@ -62,7 +62,7 @@ func (ms MSTeamController) Alert(c *gin.Context) {
 		return
 	}
 
-	err = ms.msTeamsService.Send(context.Background(), msg)
+	err = ms.msTeamsService.Send(context.Background(), *msg)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": err.Error()})
 		return

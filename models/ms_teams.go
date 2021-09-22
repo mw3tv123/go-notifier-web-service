@@ -2,12 +2,28 @@ package models
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 
 	msTeams "github.com/atc0005/go-teams-notify/v2"
 	"github.com/mw3tv123/go-notify/forms"
+	"github.com/mw3tv123/go-notify/utils"
 	"github.com/pkg/errors"
 )
+
+type AlertCard struct {
+	ThemeColor string `json:"themeColor"`
+	Summary    string `json:"summary"`
+	Sections   []struct {
+		ActivityTitle    string `json:"activityTitle"`
+		ActivitySubtitle string `json:"activitySubtitle"`
+		ActivityImage    string `json:"activityImage"`
+		Facts            []struct {
+			Name  string `json:"name"`
+			Value string `json:"value"`
+		} `json:"facts"`
+		Markdown bool `json:"markdown"`
+	} `json:"sections"`
+}
 
 // MSTeamsService struct holds necessary data to communicate with the MSTeams API.
 type MSTeamsService struct {
@@ -40,46 +56,47 @@ func (m *MSTeamsService) AddReceivers(webHooks ...string) {
 	m.webHooks = append(m.webHooks, webHooks...)
 }
 
-// AddImageCardSection add an image url to message card section
-func (m MSTeamsService) AddImageCardSection(imgTitle, imgUrl string) msTeams.MessageCardSectionImage {
-	img := msTeams.NewMessageCardSectionImage()
+func (m MSTeamsService) loadTemplate(path string) (card *msTeams.MessageCard, err error) {
+	tpl, err := utils.LoadJSON(path)
+	if err != nil {
+		return nil, err
+	}
 
-	img.Title = imgTitle
-	img.Image = imgUrl
+	err = json.Unmarshal(tpl, &card)
 
-	return img
+	return card, err
 }
 
-// CreateFactsFromList return a list of MessageCardSectionFact from the given key/value
-func (m MSTeamsService) CreateFactsFromList(kv map[string]string) (facts []msTeams.MessageCardSectionFact) {
-	for k, v := range kv {
-		fact := msTeams.NewMessageCardSectionFact()
-		fact.Name = k
-		fact.Value = v
-
-		facts = append(facts, fact)
+func (m MSTeamsService) parseTemplate(card *msTeams.MessageCard, form forms.CreateMSTeamsAlertForm) {
+	card.Sections[0].ActivityTitle = form.Title
+	for _, fact := range card.Sections[0].Facts {
+		switch fact.Name {
+		case "Monitor Name":
+			fact.Value = form.MonitorName
+			break
+		case "Description":
+			fact.Value = form.Description
+			break
+		case "Critical Level":
+			fact.Value = string(rune(form.Priority))
+			break
+		case "Created On":
+			fact.Value = form.CreateDate.String()
+			break
+		default:
+		}
 	}
-	return facts
 }
 
 // GenerateAlertCard generates a Message Card from the request alert form
-func (m MSTeamsService) GenerateAlertCard(alertForm forms.CreateMSTeamsAlertForm) (msTeams.MessageCard, error) {
-	alertCard := msTeams.NewMessageCard()
-	alertCard.Summary = "Alert from Notify Web Service"
-
-	// Add message title
-	msgCardSection := msTeams.NewMessageCardSection()
-	msgCardSection.Title = fmt.Sprintf("**%s**", alertForm.Title)
-
-	// Add message body
-	err := msgCardSection.AddFact(m.CreateFactsFromList(map[string]string{"Monitor Name": alertForm.MonitorName, "Description": alertForm.Description, "Critical Level": string(rune(alertForm.Priority)), "Submitted On": alertForm.CreateDate.String()})...)
+func (m MSTeamsService) GenerateAlertCard(alertForm forms.CreateMSTeamsAlertForm) (*msTeams.MessageCard, error) {
+	alertCard, err := m.loadTemplate("templates/alert.json")
 	if err != nil {
-		return alertCard, err
+		return nil, err
 	}
+	m.parseTemplate(alertCard, alertForm)
 
-	err = alertCard.AddSection(msgCardSection)
-
-	return alertCard, err
+	return alertCard, nil
 }
 
 // SendMessage accepts a subject and a message body and sends them to all previously specified channels. Message body

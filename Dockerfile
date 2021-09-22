@@ -3,7 +3,6 @@ FROM golang:alpine AS build-env
 WORKDIR /app/
 COPY . /app/
 ENV GO111MODULE=on
-RUN go get -v
 RUN CGO_ENABLED=0 go build -o /main ./main.go
 
 FROM alpine:3.13
