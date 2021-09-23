@@ -24,8 +24,13 @@ All configurations are stored in `config/app.env`. Besides, configurations can b
 ## Usage example
 Current developed API:
 - `/health`
-- `/ms_teams`
+- `/notify/ms_teams`
+- `/alert/ms_teams`
 
 ```shell
-$ curl http://localhost:8090/health -d '{ "title": "test-title", "content": "test content" }'
+$ # For simple notify message
+$ curl http://localhost:8090/notify/ms_teams -d '{ "title": "test-title", "content": "test content" }' -H 'Content-Type: application/json
+
+$ # For alert notify message
+$ curl http://localhost:8090/alert/ms_teams -d '{ "title": "test", "priority": 1, "monitor_name": "monitor a", "description": "Alert test a", "create_date": "2018-09-22T12:42:31+07:00" }' -H 'Content-Type: application/json
 ```
