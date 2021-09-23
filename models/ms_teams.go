@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"encoding/json"
+	"strconv"
 
 	msTeams "github.com/atc0005/go-teams-notify/v2"
 	"github.com/mw3tv123/go-notify/forms"
@@ -10,25 +11,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-type AlertCard struct {
-	ThemeColor string `json:"themeColor"`
-	Summary    string `json:"summary"`
-	Sections   []struct {
-		ActivityTitle    string `json:"activityTitle"`
-		ActivitySubtitle string `json:"activitySubtitle"`
-		ActivityImage    string `json:"activityImage"`
-		Facts            []struct {
-			Name  string `json:"name"`
-			Value string `json:"value"`
-		} `json:"facts"`
-		Markdown bool `json:"markdown"`
-	} `json:"sections"`
-}
-
 // MSTeamsService struct holds necessary data to communicate with the MSTeams API.
 type MSTeamsService struct {
-	client   msTeams.API
-	webHooks []string
+	client        msTeams.API
+	webHooks      []string
+	templatePaths []string
 }
 
 // NewMSTeamsService returns a new instance of a MSTeams notification service.
@@ -37,8 +24,9 @@ func NewMSTeamsService() *MSTeamsService {
 	client := msTeams.NewClient()
 
 	m := &MSTeamsService{
-		client:   client,
-		webHooks: []string{},
+		client:        client,
+		webHooks:      []string{},
+		templatePaths: []string{""},
 	}
 
 	return m
@@ -56,10 +44,11 @@ func (m *MSTeamsService) AddReceivers(webHooks ...string) {
 	m.webHooks = append(m.webHooks, webHooks...)
 }
 
+// loadTemplate load template from JSON file
 func (m MSTeamsService) loadTemplate(path string) (card *msTeams.MessageCard, err error) {
 	tpl, err := utils.LoadJSON(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "Fail to load template file: ")
 	}
 
 	err = json.Unmarshal(tpl, &card)
@@ -67,23 +56,21 @@ func (m MSTeamsService) loadTemplate(path string) (card *msTeams.MessageCard, er
 	return card, err
 }
 
+// parseTemplate simple replace field from template with value from request
 func (m MSTeamsService) parseTemplate(card *msTeams.MessageCard, form forms.CreateMSTeamsAlertForm) {
 	card.Sections[0].ActivityTitle = form.Title
-	for _, fact := range card.Sections[0].Facts {
+	for i, fact := range card.Sections[0].Facts {
 		switch fact.Name {
 		case "Monitor Name":
-			fact.Value = form.MonitorName
-			break
+			card.Sections[0].Facts[i].Value = form.MonitorName
 		case "Description":
-			fact.Value = form.Description
-			break
+			card.Sections[0].Facts[i].Value = form.Description
 		case "Critical Level":
-			fact.Value = string(rune(form.Priority))
-			break
+			card.Sections[0].Facts[i].Value = strconv.Itoa(form.Priority)
 		case "Created On":
-			fact.Value = form.CreateDate.String()
-			break
+			card.Sections[0].Facts[i].Value = form.CreateDate.String()
 		default:
+			// Omit other fields
 		}
 	}
 }
@@ -92,8 +79,12 @@ func (m MSTeamsService) parseTemplate(card *msTeams.MessageCard, form forms.Crea
 func (m MSTeamsService) GenerateAlertCard(alertForm forms.CreateMSTeamsAlertForm) (*msTeams.MessageCard, error) {
 	alertCard, err := m.loadTemplate("templates/alert.json")
 	if err != nil {
-		return nil, err
+		alertCard, err = m.loadTemplate("../templates/alert.json")
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	m.parseTemplate(alertCard, alertForm)
 
 	return alertCard, nil

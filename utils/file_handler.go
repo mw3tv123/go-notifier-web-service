@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 )
 
+// LoadJSON will load data from a JSON file into application and return a bytes array
 func LoadJSON(path string) ([]byte, error) {
 	p, err := filepath.Abs(path)
 	if err != nil {

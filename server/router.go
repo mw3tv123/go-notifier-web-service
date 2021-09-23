@@ -27,14 +27,14 @@ func NewRouter() *gin.Engine {
 	msTeamsController := controllers.NewMSTeamsController()
 
 	/*** NOTIFY GROUP API ***/
-	notifyApi := router.Group("/notify")
+	notifyAPI := router.Group("/notify")
 	{
-		notifyApi.POST("/ms_teams", msTeamsController.Notify)
+		notifyAPI.POST("/ms_teams", msTeamsController.Notify)
 	}
 	/*** ALERT GROUP API ***/
-	alertApi := router.Group("/alert")
+	alertAPI := router.Group("/alert")
 	{
-		alertApi.POST("/ms_teams", msTeamsController.Alert)
+		alertAPI.POST("/ms_teams", msTeamsController.Alert)
 	}
 
 	return router

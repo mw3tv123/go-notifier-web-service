@@ -56,6 +56,7 @@ func TestMSTeamsAlert(t *testing.T) {
 	router.ServeHTTP(failRec, reqFail)
 	router.ServeHTTP(failTitleRec, reqTitleFail)
 
+	assert.Equal(t, 200, successRec.Code)
 	assert.Equal(t, 406, failRec.Code)
 	assert.Equal(t, 406, failTitleRec.Code)
 }
