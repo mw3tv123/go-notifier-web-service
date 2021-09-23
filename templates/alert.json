@@ -1,0 +1,25 @@
+{
+  "@type": "MessageCard",
+  "@context": "http://schema.org/extensions",
+  "themeColor": "0076D7",
+  "summary": "Alert from Notify Web Service",
+  "sections": [{
+    "activityTitle": "",
+    "activitySubtitle": "Handle by Notify Web Service",
+    "activityImage": "https://github.com/mw3tv123/images/blob/main/common/alert-icon.jpeg?raw=true",
+    "facts": [{
+      "name": "Monitor Name",
+      "value": ""
+    }, {
+      "name": "Description",
+      "value": ""
+    }, {
+      "name": "Critical Level",
+      "value": ""
+    }, {
+      "name": "Created On",
+      "value": ""
+    }],
+    "markdown": true
+  }]
+}

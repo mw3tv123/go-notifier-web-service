@@ -2,7 +2,9 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/mw3tv123/go-notify/controllers"
+	"github.com/mw3tv123/go-notify/forms"
 	"github.com/mw3tv123/go-notify/middlewares"
 )
 
@@ -10,15 +12,30 @@ import (
 func NewRouter() *gin.Engine {
 	router := gin.New()
 
-	router.Use(gin.LoggerWithFormatter(middlewares.LogFormatter))
 	router.Use(gin.Recovery())
+
+	// Custom form log formatter
+	router.Use(gin.LoggerWithFormatter(middlewares.LogFormatter))
+
+	// Custom form validator
+	binding.Validator = new(forms.DefaultValidator)
 
 	health := new(controllers.HealthController)
 	router.GET("/health", health.Status)
 
-	/*** START MS TEAMS ***/
+	/*** START CONTROLLER ***/
 	msTeamsController := controllers.NewMSTeamsController()
-	router.POST("/ms_teams", msTeamsController.Notify)
+
+	/*** NOTIFY GROUP API ***/
+	notifyAPI := router.Group("/notify")
+	{
+		notifyAPI.POST("/ms_teams", msTeamsController.Notify)
+	}
+	/*** ALERT GROUP API ***/
+	alertAPI := router.Group("/alert")
+	{
+		alertAPI.POST("/ms_teams", msTeamsController.Alert)
+	}
 
 	return router
 }

@@ -49,10 +49,8 @@ func GetDB() *MySQL {
 
 // Init ConnectToDataBase Connect to main DB (MySQL)
 func Init() {
-	c := config.GetConfig()
-
-	datasource := fmt.Sprintf("%s:%s@%s(%s)/%s?parseTime=true", c.GetString("database.username"), c.GetString("database.password"), c.GetString("database.protocol"), c.GetString("database.address"), c.GetString("database.name"))
-	err := createDBConnection(c.GetString("database.driver"), datasource)
+	datasource := fmt.Sprintf("%s:%s@%s(%s)/%s?parseTime=true", config.GetConfig("database.username"), config.GetConfig("database.password"), config.GetConfig("database.protocol"), config.GetConfig("database.address"), config.GetConfig("database.name"))
+	err := createDBConnection(config.GetConfig("database.driver"), datasource)
 	if err != nil {
 		log.Fatal(err)
 	}
