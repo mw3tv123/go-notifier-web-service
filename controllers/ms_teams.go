@@ -10,16 +10,16 @@ import (
 	"github.com/mw3tv123/go-notify/models"
 )
 
-// MSTeamController ...
-type MSTeamController struct {
+// MSTeamsController ...
+type MSTeamsController struct {
 	msTeamsService *models.MSTeamsService
 }
 
 var msTeamsForm = new(forms.MSTeamsForm)
 
 // NewMSTeamsController Initiate MSTeams service for transmitting message to MS Teams
-func NewMSTeamsController() MSTeamController {
-	msTeamsController := MSTeamController{
+func NewMSTeamsController() MSTeamsController {
+	msTeamsController := MSTeamsController{
 		msTeamsService: models.NewMSTeamsService(),
 	}
 	msTeamsController.msTeamsService.AddReceivers(config.GetConfig("MS_TEAMS_WEBHOOK"))
@@ -28,11 +28,11 @@ func NewMSTeamsController() MSTeamController {
 }
 
 // Notify send a simple notification to MS Teams webhook
-func (ms MSTeamController) Notify(c *gin.Context) {
+func (ms MSTeamsController) Notify(c *gin.Context) {
 	var msTeamsNotifyForm forms.CreateMSTeamsNotifyForm
 
 	if validationErr := c.ShouldBindJSON(&msTeamsNotifyForm); validationErr != nil {
-		message := msTeamsForm.CreateNotify(validationErr)
+		message := msTeamsForm.GetValidatedErrorMessage(validationErr)
 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": message})
 		return
 	}
@@ -47,11 +47,11 @@ func (ms MSTeamController) Notify(c *gin.Context) {
 }
 
 // Alert create an alert card and then send it to all MS Teams webhook
-func (ms MSTeamController) Alert(c *gin.Context) {
+func (ms MSTeamsController) Alert(c *gin.Context) {
 	var msTeamsAlertForm forms.CreateMSTeamsAlertForm
 
 	if validationErr := c.ShouldBindJSON(&msTeamsAlertForm); validationErr != nil {
-		message := msTeamsForm.CreateAlert(validationErr)
+		message := msTeamsForm.GetValidatedErrorMessage(validationErr)
 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": message})
 		return
 	}

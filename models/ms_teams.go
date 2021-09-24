@@ -13,9 +13,8 @@ import (
 
 // MSTeamsService struct holds necessary data to communicate with the MSTeams API.
 type MSTeamsService struct {
-	client        msTeams.API
-	webHooks      []string
-	templatePaths []string
+	client   msTeams.API
+	webHooks []string
 }
 
 // NewMSTeamsService returns a new instance of a MSTeams notification service.
@@ -24,9 +23,8 @@ func NewMSTeamsService() *MSTeamsService {
 	client := msTeams.NewClient()
 
 	m := &MSTeamsService{
-		client:        client,
-		webHooks:      []string{},
-		templatePaths: []string{""},
+		client:   client,
+		webHooks: []string{},
 	}
 
 	return m
@@ -61,8 +59,8 @@ func (m MSTeamsService) parseTemplate(card *msTeams.MessageCard, form forms.Crea
 	card.Sections[0].ActivityTitle = form.Title
 	for i, fact := range card.Sections[0].Facts {
 		switch fact.Name {
-		case "Monitor Name":
-			card.Sections[0].Facts[i].Value = form.MonitorName
+		case "Service Name":
+			card.Sections[0].Facts[i].Value = form.ServiceName
 		case "Description":
 			card.Sections[0].Facts[i].Value = form.Description
 		case "Critical Level":

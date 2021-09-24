@@ -21,6 +21,9 @@ $ go run .
 ## Configuration
 All configurations are stored in `config/app.env`. Besides, configurations can be overrided from export environment.
 
+Beside default message struct, you can change the template used to send message. Reference to following for each channel template:
+- [MS Team](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#example-of-connector-message): all message send to MS Teams must use legacy `MessageCard`, detail can be found in link;
+
 ## Usage example
 Current developed API:
 - `/health`
@@ -32,5 +35,17 @@ $ # For simple notify message
 $ curl http://localhost:8090/notify/ms_teams -d '{ "title": "test-title", "content": "test content" }' -H 'Content-Type: application/json
 
 $ # For alert notify message
-$ curl http://localhost:8090/alert/ms_teams -d '{ "title": "test", "priority": 1, "monitor_name": "monitor a", "description": "Alert test a", "create_date": "2018-09-22T12:42:31+07:00" }' -H 'Content-Type: application/json
+$ curl http://localhost:8090/alert/ms_teams -d '{ "title": "test", "priority": 1, "service_name": "monitor a", "description": "Alert test a", "create_date": "2018-09-22T12:42:31+07:00" }' -H 'Content-Type: application/json'
 ```
+- ***Health*** --- `/health`, return HTTP code 200 when application ready to serve API
+
+- ***Notify*** --- Group API `/notyfy/`, request body with 2 params:
+  + `title`: Title of message (`required,min=3,max=100`)
+  + `content`: Content of message (`required,min=3,max=200`)
+
+- ***Alert*** --- Group API `/alert/`, request body with 5 params:
+  + `title`: Title of alert (`required,min=3,max=100`)
+  + `service_name`: Service trigger alert (`required,min=3,max=100`)
+  + `description`: Alert description (`can empty,max=100`)
+  + `priority`: Or in another word: `critical level` (`required,min=0,max=10`)
+  + `create_date`: Date the alert create, which is control by request client (`can empty`)
