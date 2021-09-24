@@ -40,7 +40,7 @@ func TestMSTeamsAlert(t *testing.T) {
 	config.Init()
 	router := server.NewRouter()
 
-	var successBody = []byte(`{ "title": "test", "priority": 1, "monitor_name": "monitor a", "description": "Alert test a", "create_date": "2018-09-22T12:42:31+07:00" }`)
+	var successBody = []byte(`{ "title": "test", "priority": 1, "service_name": "monitor a", "description": "Alert test a", "create_date": "2018-09-22T12:42:31+07:00" }`)
 	var invalidBody = []byte(`{ "invalid_field": "invalid)_value", "content": "test" }`)
 	var titleLengthInvalidBody = []byte(`{ "title": "2c", "content": "test" }`)
 
