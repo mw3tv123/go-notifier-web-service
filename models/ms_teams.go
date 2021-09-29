@@ -103,6 +103,8 @@ func (m MSTeamsService) send(ctx context.Context, msgCard msTeams.MessageCard) e
 	return nil
 }
 
+// SendMessage sends a message (in this case is a MessageCard) into MS Teams channel with the given webhook.
+// This message only contains basic part like title and contents.
 func (m MSTeamsService) SendMessage(ctx context.Context, form forms.RequestMessageForm) error {
 	msgCard := msTeams.NewMessageCard()
 	msgCard.Title = form.Title
@@ -111,6 +113,8 @@ func (m MSTeamsService) SendMessage(ctx context.Context, form forms.RequestMessa
 	return m.send(ctx, msgCard)
 }
 
+// SendAlert sends a MessageCard with more information field than a normal message. Message is load from a template
+// json file from template directory.
 func (m MSTeamsService) SendAlert(ctx context.Context, alertForm forms.RequestAlertForm) error {
 	msg, err := m.generateAlertCard(alertForm)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+// SupportedChannels represents list of current supported channels
 var SupportedChannels = []string{"teams"}
 
 // RequestForm ...
