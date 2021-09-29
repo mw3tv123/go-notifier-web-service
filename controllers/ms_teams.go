@@ -10,62 +10,71 @@ import (
 	"github.com/mw3tv123/go-notify/models"
 )
 
-// MSTeamsController ...
-type MSTeamsController struct {
-	msTeamsService *models.MSTeamsService
+// NotificationController ...
+type NotificationController struct {
+	channels map[string]models.Channel
 }
 
-var msTeamsForm = new(forms.MSTeamsForm)
+var requestForm = new(forms.RequestForm)
 
-// NewMSTeamsController Initiate MSTeams service for transmitting message to MS Teams
-func NewMSTeamsController() MSTeamsController {
-	msTeamsController := MSTeamsController{
-		msTeamsService: models.NewMSTeamsService(),
+// NewNotificationController Initiate MSTeams service for transmitting message to MS Teams
+func NewNotificationController() NotificationController {
+	notificationController := NotificationController{
+		channels: map[string]models.Channel{
+			"teams": models.NewMSTeamsService(config.GetConfig("MS_TEAMS_WEBHOOK")),
+		},
 	}
-	msTeamsController.msTeamsService.AddReceivers(config.GetConfig("MS_TEAMS_WEBHOOK"))
 
-	return msTeamsController
+	return notificationController
 }
 
-// Notify send a simple notification to MS Teams webhook
-func (ms MSTeamsController) Notify(c *gin.Context) {
-	var msTeamsNotifyForm forms.CreateMSTeamsNotifyForm
+// Message send a simple message to MS Teams webhook
+func (n NotificationController) Message(c *gin.Context) {
+	var messageForm forms.RequestMessageForm
 
-	if validationErr := c.ShouldBindJSON(&msTeamsNotifyForm); validationErr != nil {
-		message := msTeamsForm.GetValidatedErrorMessage(validationErr)
+	if validationErr := c.ShouldBindJSON(&messageForm); validationErr != nil {
+		message := requestForm.GetValidatedErrorMessage(validationErr)
 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": message})
 		return
 	}
 
-	err := ms.msTeamsService.SendMessage(context.Background(), msTeamsNotifyForm.Title, msTeamsNotifyForm.Content)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": err.Error()})
-		return
+	if len(messageForm.Channels) <= 0 {
+		messageForm.Channels = forms.SupportedChannels
+	}
+
+	for _, name := range messageForm.Channels {
+		err := n.channels[name].SendMessage(context.Background(), messageForm)
+
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": err.Error()})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully notified"})
 }
 
 // Alert create an alert card and then send it to all MS Teams webhook
-func (ms MSTeamsController) Alert(c *gin.Context) {
-	var msTeamsAlertForm forms.CreateMSTeamsAlertForm
+func (n NotificationController) Alert(c *gin.Context) {
+	var alertForm forms.RequestAlertForm
 
-	if validationErr := c.ShouldBindJSON(&msTeamsAlertForm); validationErr != nil {
-		message := msTeamsForm.GetValidatedErrorMessage(validationErr)
+	if validationErr := c.ShouldBindJSON(&alertForm); validationErr != nil {
+		message := requestForm.GetValidatedErrorMessage(validationErr)
 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": message})
 		return
 	}
 
-	msg, err := ms.msTeamsService.GenerateAlertCard(msTeamsAlertForm)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": err.Error()})
-		return
+	if len(alertForm.Channels) <= 0 {
+		alertForm.Channels = forms.SupportedChannels
 	}
 
-	err = ms.msTeamsService.Send(context.Background(), *msg)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": err.Error()})
-		return
+	for _, name := range alertForm.Channels {
+		err := n.channels[name].SendAlert(context.Background(), alertForm)
+
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{"message": err.Error()})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully notified"})

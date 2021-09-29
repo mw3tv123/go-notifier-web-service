@@ -8,7 +8,7 @@
     "activitySubtitle": "Handle by Notify Web Service",
     "activityImage": "https://github.com/mw3tv123/images/blob/main/common/alert-icon.jpeg?raw=true",
     "facts": [{
-      "name": "Monitor Name",
+      "name": "Service Name",
       "value": ""
     }, {
       "name": "Description",

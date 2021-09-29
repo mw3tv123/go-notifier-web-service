@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
+	"time"
 
 	msTeams "github.com/atc0005/go-teams-notify/v2"
+	"github.com/mw3tv123/go-notify/config"
 	"github.com/mw3tv123/go-notify/forms"
 	"github.com/mw3tv123/go-notify/utils"
 	"github.com/pkg/errors"
@@ -13,33 +15,23 @@ import (
 
 // MSTeamsService struct holds necessary data to communicate with the MSTeams API.
 type MSTeamsService struct {
+	name     string
 	client   msTeams.API
 	webHooks []string
 }
 
 // NewMSTeamsService returns a new instance of a MSTeams notification service.
 // For more information about MSTeams api token:
-func NewMSTeamsService() *MSTeamsService {
+func NewMSTeamsService(wh ...string) *MSTeamsService {
 	client := msTeams.NewClient()
 
 	m := &MSTeamsService{
+		name:     "teams",
 		client:   client,
-		webHooks: []string{},
+		webHooks: wh,
 	}
 
 	return m
-}
-
-// DisableWebhookValidation disables the validation of webhook URLs, including the validation of known prefixes so that
-// custom/private webhook URL endpoints can be used (e.g., testing purposes).
-func (m *MSTeamsService) DisableWebhookValidation() {
-	m.client.SkipWebhookURLValidationOnSend(true)
-}
-
-// AddReceivers takes MSTeams channel web-hooks and adds them to the internal web-hook list. The Send method will send
-// a given message to all those chats.
-func (m *MSTeamsService) AddReceivers(webHooks ...string) {
-	m.webHooks = append(m.webHooks, webHooks...)
 }
 
 // loadTemplate load template from JSON file
@@ -55,7 +47,7 @@ func (m MSTeamsService) loadTemplate(path string) (card *msTeams.MessageCard, er
 }
 
 // parseTemplate simple replace field from template with value from request
-func (m MSTeamsService) parseTemplate(card *msTeams.MessageCard, form forms.CreateMSTeamsAlertForm) {
+func (m MSTeamsService) parseTemplate(card *msTeams.MessageCard, form forms.RequestAlertForm) {
 	card.Sections[0].ActivityTitle = form.Title
 	for i, fact := range card.Sections[0].Facts {
 		switch fact.Name {
@@ -66,15 +58,20 @@ func (m MSTeamsService) parseTemplate(card *msTeams.MessageCard, form forms.Crea
 		case "Critical Level":
 			card.Sections[0].Facts[i].Value = strconv.Itoa(form.Priority)
 		case "Created On":
-			card.Sections[0].Facts[i].Value = form.CreateDate.String()
+			if form.CreateDate.IsZero() {
+				location, _ := time.LoadLocation(config.GetConfig("TZ"))
+				card.Sections[0].Facts[i].Value = time.Now().In(location).Format(time.RFC1123Z)
+			} else {
+				card.Sections[0].Facts[i].Value = form.CreateDate.String()
+			}
 		default:
 			// Omit other fields
 		}
 	}
 }
 
-// GenerateAlertCard generates a Message Card from the request alert form
-func (m MSTeamsService) GenerateAlertCard(alertForm forms.CreateMSTeamsAlertForm) (*msTeams.MessageCard, error) {
+// generateAlertCard generates a Message Card from the request alert form
+func (m MSTeamsService) generateAlertCard(alertForm forms.RequestAlertForm) (*msTeams.MessageCard, error) {
 	alertCard, err := m.loadTemplate("templates/alert.json")
 	if err != nil {
 		alertCard, err = m.loadTemplate("../templates/alert.json")
@@ -88,19 +85,9 @@ func (m MSTeamsService) GenerateAlertCard(alertForm forms.CreateMSTeamsAlertForm
 	return alertCard, nil
 }
 
-// SendMessage accepts a subject and a message body and sends them to all previously specified channels. Message body
-// supports html as markup language.
-func (m MSTeamsService) SendMessage(ctx context.Context, subject, message string) error {
-	msgCard := msTeams.NewMessageCard()
-	msgCard.Title = subject
-	msgCard.Text = message
-
-	return m.Send(ctx, msgCard)
-}
-
-// Send accepts a subject and a message body and sends them to all previously specified channels. Message body supports
+// send accepts a subject and a message body and sends them to all previously specified channels. Message body supports
 // html as markup language.
-func (m MSTeamsService) Send(ctx context.Context, msgCard msTeams.MessageCard) error {
+func (m MSTeamsService) send(ctx context.Context, msgCard msTeams.MessageCard) error {
 	for _, webHook := range m.webHooks {
 		select {
 		case <-ctx.Done():
@@ -114,4 +101,25 @@ func (m MSTeamsService) Send(ctx context.Context, msgCard msTeams.MessageCard) e
 	}
 
 	return nil
+}
+
+// SendMessage sends a message (in this case is a MessageCard) into MS Teams channel with the given webhook.
+// This message only contains basic part like title and contents.
+func (m MSTeamsService) SendMessage(ctx context.Context, form forms.RequestMessageForm) error {
+	msgCard := msTeams.NewMessageCard()
+	msgCard.Title = form.Title
+	msgCard.Text = form.Content
+
+	return m.send(ctx, msgCard)
+}
+
+// SendAlert sends a MessageCard with more information field than a normal message. Message is load from a template
+// json file from template directory.
+func (m MSTeamsService) SendAlert(ctx context.Context, alertForm forms.RequestAlertForm) error {
+	msg, err := m.generateAlertCard(alertForm)
+	if err != nil {
+		return err
+	}
+
+	return m.send(ctx, *msg)
 }

@@ -24,17 +24,17 @@ func NewRouter() *gin.Engine {
 	router.GET("/health", health.Status)
 
 	/*** START CONTROLLER ***/
-	msTeamsController := controllers.NewMSTeamsController()
+	notificationController := controllers.NewNotificationController()
 
 	/*** NOTIFY GROUP API ***/
-	notifyAPI := router.Group("/notify")
+	notifyAPI := router.Group("/message")
 	{
-		notifyAPI.POST("/ms_teams", msTeamsController.Notify)
+		notifyAPI.POST("/ms_teams", notificationController.Message)
 	}
 	/*** ALERT GROUP API ***/
 	alertAPI := router.Group("/alert")
 	{
-		alertAPI.POST("/ms_teams", msTeamsController.Alert)
+		alertAPI.POST("/ms_teams", notificationController.Alert)
 	}
 
 	return router
