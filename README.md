@@ -39,13 +39,13 @@ $ curl http://localhost:8090/alert/ms_teams -d '{ "title": "test", "priority": 1
 ```
 - ***Health*** --- `/health`, return HTTP code 200 when application ready to serve API
 
-- ***Notify*** --- Group API `/notyfy/`, request body with 2 params:
-  + `title`: Title of message (`required,min=3,max=100`)
-  + `content`: Content of message (`required,min=3,max=200`)
+- ***Notify*** --- Group API `/message/`, request body with 2 params:
+  + `title` - Title of message (`required,min=3,max=100`)
+  + `content` - Content of message (`required,min=3,max=200`)
 
 - ***Alert*** --- Group API `/alert/`, request body with 5 params:
-  + `title`: Title of alert (`required,min=3,max=100`)
-  + `service_name`: Service trigger alert (`required,min=3,max=100`)
-  + `description`: Alert description (`can empty,max=100`)
-  + `priority`: Or in another word: `critical level` (`required,min=0,max=10`)
-  + `create_date`: Date the alert create, which is control by request client (`can empty`)
+  + `title` - Title of alert (`required,min=3,max=100`)
+  + `service_name` - Service trigger alert (`required,min=3,max=100`)
+  + `description` - Alert description (`can empty,max=100`)
+  + `priority` - Or in another word: `critical level` (`required,min=0,max=10`)
+  + `create_date` - Date the alert create, which is control by request client (`can empty`)

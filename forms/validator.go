@@ -42,9 +42,7 @@ func (v *DefaultValidator) lazyInit() {
 		v.validate.SetTagName("binding")
 
 		// Add any custom validations etc. here
-
-		// Custom rule for create_date in alert POST APi
-		// _ = v.validate.RegisterValidation("ISO8601date", ValidateISO8601Field)
+		_ = v.validate.RegisterValidation("supportChannel", ValidateChannel)
 	})
 }
 
@@ -57,4 +55,17 @@ func kindOfData(data interface{}) reflect.Kind {
 		valueType = value.Elem().Kind()
 	}
 	return valueType
+}
+
+// ValidateChannel will check if each channel request by client is supported by application or not.
+func ValidateChannel(fl validator.FieldLevel) bool {
+	channel := fl.Field().String()
+
+	for _, c := range SupportedChannels {
+		if c == channel {
+			return true
+		}
+	}
+
+	return false
 }
