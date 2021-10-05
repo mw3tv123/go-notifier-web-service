@@ -15,7 +15,6 @@ import (
 
 // MSTeamsService struct holds necessary data to communicate with the MSTeams API.
 type MSTeamsService struct {
-	name     string
 	client   msTeams.API
 	webHooks []string
 }
@@ -26,7 +25,6 @@ func NewMSTeamsService(wh ...string) *MSTeamsService {
 	client := msTeams.NewClient()
 
 	m := &MSTeamsService{
-		name:     "teams",
 		client:   client,
 		webHooks: wh,
 	}

@@ -22,6 +22,7 @@ func NewNotificationController() NotificationController {
 	notificationController := NotificationController{
 		channels: map[string]models.Channel{
 			"teams": models.NewMSTeamsService(config.GetConfig("MS_TEAMS_WEBHOOK")),
+			"email": models.NewEmailService(config.GetConfig("SENDER_ADDRESS"), config.GetConfig("SMTP_HOST_ADDRESS")),
 		},
 	}
 
