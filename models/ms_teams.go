@@ -3,11 +3,10 @@ package models
 import (
 	"context"
 	"encoding/json"
-	"strconv"
-	"time"
+	"fmt"
+	"strings"
 
 	msTeams "github.com/atc0005/go-teams-notify/v2"
-	"github.com/mw3tv123/go-notify/config"
 	"github.com/mw3tv123/go-notify/forms"
 	"github.com/mw3tv123/go-notify/utils"
 	"github.com/pkg/errors"
@@ -45,53 +44,66 @@ func (m MSTeamsService) loadTemplate(path string) (card *msTeams.MessageCard, er
 }
 
 // parseTemplate simple replace field from template with value from request
-func (m MSTeamsService) parseTemplate(card *msTeams.MessageCard, form forms.RequestAlertForm) {
-	card.Sections[0].ActivityTitle = form.Title
-	for i, fact := range card.Sections[0].Facts {
-		switch fact.Name {
-		case "Service Name":
-			card.Sections[0].Facts[i].Value = form.ServiceName
-		case "Description":
-			card.Sections[0].Facts[i].Value = form.Description
-		case "Critical Level":
-			card.Sections[0].Facts[i].Value = strconv.Itoa(form.Priority)
-		case "Created On":
-			if form.CreateDate.IsZero() {
-				location, _ := time.LoadLocation(config.GetConfig("TZ"))
-				card.Sections[0].Facts[i].Value = time.Now().In(location).Format(time.RFC1123Z)
-			} else {
-				card.Sections[0].Facts[i].Value = form.CreateDate.String()
-			}
-		default:
-			// Omit other fields
+func (m MSTeamsService) parseTemplate(card *msTeams.MessageCard, form forms.MessageForm) {
+	if form.Contents["title"] != nil {
+		card.Title = form.Contents["title"].(string)
+	}
+
+	for i := range card.Sections[0].Facts {
+		field := strings.ToLower(strings.ReplaceAll(card.Sections[0].Facts[i].Name, " ", "_"))
+		if form.Contents[field] != "" {
+			card.Sections[0].Facts[i].Value = fmt.Sprintf("%v", form.Contents[field])
 		}
 	}
 }
 
-// generateAlertCard generates a Message Card from the request alert form
-func (m MSTeamsService) generateAlertCard(alertForm forms.RequestAlertForm) (*msTeams.MessageCard, error) {
-	alertCard, err := m.loadTemplate("templates/alert.json")
-	if err != nil {
-		alertCard, err = m.loadTemplate("../templates/alert.json")
+// generateMessage generates a Message Card from the request form.
+// Message Card maybe generated from normal MS Teams Message Card or parse into a pre define template.
+// Template is a template file.
+// TODO: template store in memory, database,...
+func (m MSTeamsService) generateMessage(form forms.MessageForm) (msgCard *msTeams.MessageCard, err error) {
+	// From pre defined template file
+	if form.Template != "" {
+		msgCard, err = m.loadTemplate(fmt.Sprintf("templates/msteams_%s.json", form.Template))
 		if err != nil {
 			return nil, err
 		}
+
+		m.parseTemplate(msgCard, form)
+
+	} else { // Normal Message Card
+		msgCard = &msTeams.MessageCard{
+			Type:    "MessageCard",
+			Context: "https://schema.org/extensions",
+			Title:   "Message from Notify system",
+		}
+
+		if form.Contents["title"] != nil {
+			msgCard.Title = form.Contents["title"].(string)
+		}
+
+		for k, v := range form.Contents {
+			msgCard.Text += fmt.Sprintf("%s: %v\n", k, v)
+		}
 	}
 
-	m.parseTemplate(alertCard, alertForm)
-
-	return alertCard, nil
+	return msgCard, nil
 }
 
-// send accepts a subject and a message body and sends them to all previously specified channels. Message body supports
+// Send accepts a subject and a message body and sends them to all previously specified channels. Message body supports
 // html as markup language.
-func (m MSTeamsService) send(ctx context.Context, msgCard msTeams.MessageCard) error {
+func (m MSTeamsService) Send(ctx context.Context, form forms.MessageForm) error {
+	msgCard, err := m.generateMessage(form)
+	if err != nil {
+		return err
+	}
+
 	for _, webHook := range m.webHooks {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			err := m.client.SendWithContext(ctx, webHook, msgCard)
+			err = m.client.SendWithContext(ctx, webHook, *msgCard)
 			if err != nil {
 				return errors.Wrapf(err, "Failed to send message to Microsoft Teams via webhook '%s'", webHook)
 			}
@@ -99,25 +111,4 @@ func (m MSTeamsService) send(ctx context.Context, msgCard msTeams.MessageCard) e
 	}
 
 	return nil
-}
-
-// SendMessage sends a message (in this case is a MessageCard) into MS Teams channel with the given webhook.
-// This message only contains basic part like title and contents.
-func (m MSTeamsService) SendMessage(ctx context.Context, form forms.RequestMessageForm) error {
-	msgCard := msTeams.NewMessageCard()
-	msgCard.Title = form.Title
-	msgCard.Text = form.Content
-
-	return m.send(ctx, msgCard)
-}
-
-// SendAlert sends a MessageCard with more information field than a normal message. Message is load from a template
-// json file from template directory.
-func (m MSTeamsService) SendAlert(ctx context.Context, alertForm forms.RequestAlertForm) error {
-	msg, err := m.generateAlertCard(alertForm)
-	if err != nil {
-		return err
-	}
-
-	return m.send(ctx, *msg)
 }

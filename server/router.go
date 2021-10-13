@@ -20,22 +20,13 @@ func NewRouter() *gin.Engine {
 	// Custom form validator
 	binding.Validator = new(forms.DefaultValidator)
 
+	/*** HEALTH CHECK API ***/
 	health := new(controllers.HealthController)
 	router.GET("/health", health.Status)
 
-	/*** START CONTROLLER ***/
-	notificationController := controllers.NewNotificationController()
-
 	/*** NOTIFY GROUP API ***/
-	notifyAPI := router.Group("/message")
-	{
-		notifyAPI.POST("/ms_teams", notificationController.Message)
-	}
-	/*** ALERT GROUP API ***/
-	alertAPI := router.Group("/alert")
-	{
-		alertAPI.POST("/ms_teams", notificationController.Alert)
-	}
+	notificationController := controllers.NewNotificationController()
+	router.POST("/notify", notificationController.Notify)
 
 	return router
 }
