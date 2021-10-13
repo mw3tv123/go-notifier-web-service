@@ -3,7 +3,6 @@ package forms
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -14,40 +13,14 @@ var SupportedChannels = []string{"teams"}
 // RequestForm ...
 type RequestForm struct{}
 
-// RequestMessageForm represents a request form client for sending out a message to target channel.
-type RequestMessageForm struct {
-	// Title is the title property of a card. is meant to be rendered in a
-	// prominent way, at the very top of the card. Use it to introduce the
-	// content of the card in such a way users will immediately know what to
-	// expect.
-	Title string `form:"title" json:"title" binding:"required,min=3,max=100"`
-	// Content is the message which send to target channels. Supported only short message with maximum of 200 characters.
-	Content string `form:"content" json:"content" binding:"required,min=3,max=200"`
+// MessageForm represents a request form client for sending out a message to target channel.
+type MessageForm struct {
+	// Contents is the message which send to target channels.
+	Contents map[string]interface{} `form:"contents" json:"contents" binding:"required"`
 	// Channels is list of channels client to sent notification to. List of supported channels must add to custom validator.
 	Channels []string `form:"channels" json:"channels,omitempty" binding:"dive,supportChannel"`
-}
-
-// RequestAlertForm represents a request form client for sending out a alert message card to target channel.
-type RequestAlertForm struct {
-	// Title is same as Title in RequestMessageForm
-	Title string `form:"title" json:"title" binding:"required,min=3,max=100"`
-
-	// Priority or Critical indicate the importance of this message. Priority level in some services may in scale of 5,
-	// while other services may have scale up to 10.
-	Priority int `form:"priority" json:"priority" binding:"required,min=0,max=10"`
-
-	// ServiceName is the name of service has alert.
-	ServiceName string `form:"service_name" json:"service_name" binding:"required,min=3,max=100"`
-
-	// Description describe the information about alert. Maybe detail, maybe summary.
-	Description string `form:"description" json:"description,omitempty" binding:"max=100"`
-
-	// CreateDate is the date the service received alert. If left empty, system will choose
-	// current timestamp as default CreateDate to sent to channel.
-	CreateDate time.Time `form:"create_date" json:"create_date,omitempty"`
-
-	// Channels same as channels in normal message. Reference to RequestMessageForm Channels.
-	Channels []string `form:"channels" json:"channels,omitempty" binding:"dive,supportChannel"`
+	// Template is a name of a template client wish their message to be loaded into.
+	Template string `form:"template" json:"template,omitempty"`
 }
 
 // evaluateErrorMessage evaluate error message by combine tag, field name and param

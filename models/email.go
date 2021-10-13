@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"fmt"
 	"net/smtp"
 	"net/textproto"
 
@@ -42,10 +41,18 @@ func (m *EmailService) AddReceivers(addresses ...string) {
 	m.receiverAddresses = append(m.receiverAddresses, addresses...)
 }
 
-// send takes a message subject and a message body and sends them to all previously set chats. Message body supports
+// Send takes a message subject and a message body and sends them to all previously set chats. Message body supports
 // html as markup language.
-func (m EmailService) send(ctx context.Context, mail *email.Email) error {
+func (m EmailService) Send(ctx context.Context, form forms.MessageForm) error {
 	var err error
+	mail := &email.Email{
+		To:   m.receiverAddresses,
+		From: m.senderAddress,
+		// Subject: form.Contents["title"].(string),
+		// Text:    []byte("Text Body is, of course, supported!"),
+		// HTML:    []byte(form.Content),
+		Headers: textproto.MIMEHeader{},
+	}
 	select {
 	case <-ctx.Done():
 		err = ctx.Err()
@@ -57,31 +64,4 @@ func (m EmailService) send(ctx context.Context, mail *email.Email) error {
 	}
 
 	return err
-}
-
-// SendMessage ...
-func (m EmailService) SendMessage(ctx context.Context, form forms.RequestMessageForm) error {
-	mail := &email.Email{
-		To:      m.receiverAddresses,
-		From:    m.senderAddress,
-		Subject: form.Title,
-		// Text:    []byte("Text Body is, of course, supported!"),
-		HTML:    []byte(form.Content),
-		Headers: textproto.MIMEHeader{},
-	}
-
-	return m.send(ctx, mail)
-}
-
-// SendAlert ...
-func (m EmailService) SendAlert(ctx context.Context, form forms.RequestAlertForm) error {
-	mail := &email.Email{
-		To:      m.receiverAddresses,
-		From:    m.senderAddress,
-		Subject: form.Title,
-		// Text:    []byte("Text Body is, of course, supported!"),
-		HTML:    []byte(fmt.Sprintf(`%s`, form.ServiceName)),
-		Headers: textproto.MIMEHeader{},
-	}
-	return m.send(ctx, mail)
 }

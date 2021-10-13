@@ -23,22 +23,22 @@ func TestMSTeamsNotify(t *testing.T) {
 	var invalidChannelBody = []byte(`{ "title": "test", "content": "test", "channels": ["tea"] }`)
 	var titleLengthInvalidBody = []byte(`{ "title": "2c", "content": "test" }`)
 
-	reqSuccess, _ := http.NewRequest("POST", "/message/ms_teams", bytes.NewBuffer(successBody))
-	reqFail, _ := http.NewRequest("POST", "/message/ms_teams", bytes.NewBuffer(invalidTitleBody))
+	reqSuccess, _ := http.NewRequest("POST", "/notify", bytes.NewBuffer(successBody))
+	reqFail, _ := http.NewRequest("POST", "/notify", bytes.NewBuffer(invalidTitleBody))
 	router.ServeHTTP(successRec, reqSuccess)
 	router.ServeHTTP(failRec, reqFail)
 	assert.Equal(t, 200, successRec.Code)
 	assert.Equal(t, 406, failRec.Code)
 
-	reqFail, _ = http.NewRequest("POST", "/message/ms_teams", bytes.NewBuffer(invalidChannelFieldBody))
+	reqFail, _ = http.NewRequest("POST", "/notify", bytes.NewBuffer(invalidChannelFieldBody))
 	router.ServeHTTP(failRec, reqFail)
 	assert.Equal(t, 406, failRec.Code)
 
-	reqFail, _ = http.NewRequest("POST", "/message/ms_teams", bytes.NewBuffer(invalidChannelBody))
+	reqFail, _ = http.NewRequest("POST", "/notify", bytes.NewBuffer(invalidChannelBody))
 	router.ServeHTTP(failRec, reqFail)
 	assert.Equal(t, 406, failRec.Code)
 
-	reqFail, _ = http.NewRequest("POST", "/message/ms_teams", bytes.NewBuffer(titleLengthInvalidBody))
+	reqFail, _ = http.NewRequest("POST", "/notify", bytes.NewBuffer(titleLengthInvalidBody))
 	router.ServeHTTP(failRec, reqFail)
 	assert.Equal(t, 406, failRec.Code)
 }
